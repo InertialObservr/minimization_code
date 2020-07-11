@@ -131,32 +131,7 @@ def prepare_data_for_masses(line):
     
     return [QUD, ε, cijs]
 
-def test_matrix(QUD, ε, cij_mats, kind='lepton'):
 
-    if kind == 'up':
-        cij_mat = cij_mats[0]
-    if kind == 'down':
-        cij_mat = cij_mats[1]
-    if kind == 'lepton':
-        cij_mat = cij_mats[2]
-        
-    εnij = get_ε_matrix(QUD, ε, species = kind)
-    Y = cij_mat * εnij
-    Ydag = dag(Y)
-    YYdag = Y @ Ydag
-    m = np.trace(YYdag)/3
-    s = np.sqrt( np.trace(YYdag @ YYdag)/3 - m**2 )
-    # for i in range(3):
-    #     for j in range(3):
-    #         if i==j:
-    #             continue
-    #         else:
-    #             tot = tot + YYdag[i,j]
-    lbMin = m - s*np.sqrt(2)
-    ubMin = m - s/np.sqrt(2)
-    lbMax = m + s/np.sqrt(2)
-    ubMax = m + s*np.sqrt(2)
-    return lbMin, ubMin, lbMax, ubMax
                 
         
     
@@ -166,10 +141,6 @@ dataLine = prepare_data_for_χ2(8)
 z = χ2_of_row(*dataLine)
 
 dataMassesLine = prepare_data_for_masses(8)
-
-# x = sum_off_diags(*dataMassesLine, kind='lepton')
-
-lbMin, ubMin, lbMax, ubMax = test_matrix(*dataMassesLine, kind='up') 
 
 u,d,l,CKM = get_masses_and_CKM(*dataMassesLine)
 
