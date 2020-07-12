@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jul  6 14:45:53 2020
-
-@author: dillonberger
-"""
-
 import numpy as np 
 import pandas as pd
 import os
@@ -116,27 +108,7 @@ def dag(mat):
     return np.conj(np.transpose(mat))
 
 
-def chop_mat(mat, max=10**(-15)):
-    dims = np.shape(mat)
-    new_mat = np.zeros(dims)
-    for i in range(dims[0]):
-        for j in range(dims[1]):
-            if np.abs(mat[i,j]) < max:
-                new_mat[i,j] = 0
-            else:
-                new_mat[i,j] = mat[i,j]
-                
-    return new_mat
 
-def chop_list(lst, max=10**(-15)):
-    new_mat = np.zeros(len(lst))
-    for i in range(len(lst)):
-        if np.abs(lst[i]) < max:
-            new_mat[i] = 0
-        else:
-            new_mat[i] = lst[i]
-            
-    return new_mat
     
     
 
@@ -252,7 +224,6 @@ def get_masses_and_CKM(QUD, ε, cij_mats):
 
         eVals, eVecs = eigh(YYdag) 
 
-        # eVals = chop_list(eVals)
         
         
         
@@ -280,96 +251,52 @@ def get_masses_and_CKM(QUD, ε, cij_mats):
 
 
 
-def χ2_of_row(allCijs, QUD=[]):
+def transform_cijs(cijs):
     
-    ε = allCijs[0]
-    cijs = allCijs[1:]
-    cij_ulist = cijs[0:18]
-    cij_dlist = cijs[18: 2*18]
-    cij_llist = cijs[2*18: 3*18]
-    cij_lists = [cij_ulist, cij_dlist, cij_llist]
-    
-    cij_mats = []
-    for cij_list in cij_lists:
-        cij_mat = list_to_mat(cij_list)
-        cij_mats.append(cij_mat)
-    
-    upYuks, downYuks, lepYuks, V_CKM = get_masses_and_CKM(QUD, ε, cij_mats)
-    
-    CKM = V_CKM.flatten()
-    V_CKM_exp = CKM_exp.flatten()
-    
-    χ2_up = (1/3) * sum( np.sqrt((upYuks - yus)**2)/σ_yu)
-    χ2_down = (1/3) * sum( np.sqrt((downYuks - yds)**2)/σ_yd )
-    χ2_leps = (1/3) * sum( np.sqrt((lepYuks - yls)**2) /σ_yl)
-    χ2_CKM = (1/9) * sum( np.sqrt((CKM - V_CKM_exp)**2)/σ_CKM )
-    
-    χ2 = (1/4) * (χ2_up + χ2_down + χ2_leps + χ2_CKM)
-    
-    # χ2 less than one means each is less than one
-    
-    return χ2
-    
+    if  isinstance(cijs, float) or isinstance(cijs, int):
+        cij = cijs
+        sign = np.sign(cij)
 
-
-
-def find_min_of_row(ε_cijs, QUD, εmin, εmax):
-
-    
-    #upper and lower bound is n33 dep
-    cons = [{'type': 'ineq', 'fun': lambda x:  x[0] - εmin },
-            {'type': 'ineq', 'fun': lambda x:  εmax - x[0] },
-            {'type': 'ineq', 'fun': lambda x:  x[0] }]
-    
-
-    
-    for i in range(1,len(ε_cijs),2):
+        new_cij = sign * (.1 + 0.9*10.0**( -1*np.abs(cij) ) )  
+            
+        return new_cij
         
-        cons.append({'type': 'ineq', 'fun': lambda x:  np.sqrt(x[i]**2 + x[i+1]**2) - cmin})
-        cons.append({'type': 'ineq', 'fun': lambda x: cmax - np.sqrt(x[i]**2 + x[i+1]**2) })
+        
+    
+    transformed = []
+    cijs = list(cijs)
+    for cij in cijs:
+        sign = np.sign(cij)
+        new_cij = sign * (.1 + .9*10.0**( -1*np.abs(cij) ) )   
+        transformed.append(new_cij)
+        
+    return transformed
 
+def transform_ε(x, εmin, εmax):
+    return εmin + (εmax - εmin)*np.exp(-x**2)
+
+
+def generate_random_x_for_ε():
+    return rnd.uniform(0,2)
 
     
-    
-    
-    min_χ = minimize(χ2_of_row,ε_cijs, args=(QUD), 
-                     method='trust-constr', constraints = cons, 
-                     options={'maxiter': 5000}
-                      
-                     )
-    # print(min_χ)
-    res = min_χ.x
-    ε = res[0]
-    cijs = res[1:]
-    
-    cij_ulist = cijs[0:18]
-    cij_dlist = cijs[18: 2*18]
-    cij_llist = cijs[2*18: 3*18]
-    
-    uCijs = list_to_mat(cij_ulist)
-    dCijs = list_to_mat(cij_dlist)
-    lCijs = list_to_mat(cij_llist)
-    
-
-    
-    return uCijs, dCijs, lCijs, ε
 
 
-
-
-
-def generate_random_coefs(length=18):
+def generate_random_x(length=18):
+    '''generate random xs for cij = .1 + 10^x'''
     lst = []
     for i in range(length):
         if i%2 == 0:
-            randmag = rnd.uniform(cmin, cmax)
-        else: 
-            randmag = rnd.uniform(.001, 
-                                  np.sqrt(cmax**2 - randmag**2))
-
-
-            
-        randsign = rnd.choice([-1,1])
+            randmag = rnd.uniform(0, 3)
+            randsign = rnd.choice([-1,1])
+            old = randmag*randsign
+        else:
+            ub = 2
+            while ub > cmax:
+                #force the modulus of c<1
+                randmag = rnd.uniform(0, 3)
+                randsign = rnd.choice([-1,1])
+                ub = np.sqrt(transform_cijs(old)**2 + transform_cijs(randmag)**2)
         lst.append(randmag*randsign)
         
     return lst
@@ -386,77 +313,151 @@ def test_mat_ord_1(mat):
             
     return violation_count
 
+
+
+def χ2_of_row(allCijs, QUD=[], εminmax = [], transform=True,):
+    '''transform cijs and find χ2'''
+    
+    
+    
+    
+    if transform: 
+        εmin, εmax = εminmax[0], εminmax[1]
+        ε = transform_ε(allCijs[0], εmin, εmax)
+        cijs = transform_cijs(allCijs[1:])
+        
+    else:
+        ε = allCijs[0]
+        cijs = allCijs[1:]
+        
+    cij_ulist = cijs[0:18]
+    cij_dlist = cijs[18: 2*18]
+    cij_llist = cijs[2*18: 3*18]
+    cij_lists = [cij_ulist, cij_dlist, cij_llist]
+    
+    cij_mats = []
+    for cij_list in cij_lists:
+        cij_mat = list_to_mat(cij_list)
+        cij_mats.append(cij_mat)
+    
+    upYuks, downYuks, lepYuks, V_CKM = get_masses_and_CKM(QUD, ε, cij_mats)
+    
+    CKM = V_CKM.flatten()
+    V_CKM_exp = CKM_exp.flatten()
+    
+    χ2_up = (1/3) * sum( (upYuks - yus)**2/σ_yu)
+    χ2_down = (1/3) * sum( (downYuks - yds)**2/σ_yd )
+    χ2_leps = (1/3) * sum( (lepYuks - yls)**2 /σ_yl)
+    χ2_CKM = (1/9) * sum( (CKM - V_CKM_exp)**2/σ_CKM )
+    
+    χ2 = (1/4) * (χ2_up + χ2_down + χ2_leps + χ2_CKM)
+    
+    # χ2 less than one means each is less than one
+    
+    return χ2
+    
+
+
+
+
+def find_min_of_row(ε_cijs, QUD, εmin, εmax):
+
+
+    εminmax = [εmin, εmax]
+    min_χ = minimize(χ2_of_row, ε_cijs, args=(QUD, εminmax), 
+                     method='COBYLA', 
+                     options={'maxiter': 10000}
+                      
+                     )
+    res = min_χ.x
+    χ2_min = min_χ.fun
+    
+    ε = transform_ε(res[0], εmin, εmax)
+    cijs = transform_cijs(res[1:])
+
+
+
+
+    
+    
+    cij_ulist = cijs[0:18]
+    cij_dlist = cijs[18: 2*18]
+    cij_llist = cijs[2*18: 3*18]
+    
+    uCijs = list_to_mat(cij_ulist)
+    dCijs = list_to_mat(cij_dlist)
+    lCijs = list_to_mat(cij_llist)
+    
+
+    
+    return uCijs, dCijs, lCijs, ε, χ2_min
+
+
+
+
+
 def run_til_small_for_row(QUD, εmin, εmax, iters=10):
     
+    i = 1
+    χ2_dream = 100
+    χ2_min = 10**10
     
-    #need to get these boudns explicitly
-    ε0 = (εmin + εmax)/2
-    allCijs = [ε0] + list(np.concatenate((cuR, cdR, cdR)))
-    i = 0
-    
-    trigger = True
-    violations_min = 100
-    while trigger:
-        print(i)
-        if i == 0:
-            ε_cijs = allCijs
-        else:
-            c0u = generate_random_coefs()
-            c0d = generate_random_coefs()
-            c0l = generate_random_coefs()
-            ε_cijs = [ε0] + list(np.concatenate((c0u, c0d, c0l)))
-            
-            
-             
-            
-        uCijs, dCijs, lCijs, ε = find_min_of_row(ε_cijs,QUD, εmin, εmax)
+
+    while True:
+        print('iteration number: ' +str(i))
+        ε0 = generate_random_x_for_ε()
+        c0u = generate_random_x()
+        c0d = generate_random_x()
+        c0l = generate_random_x()
         
-        CijMats = [uCijs, dCijs, lCijs]
-        violations_count = 0
-        for CijMat in CijMats:
-            violations_count += test_mat_ord_1(CijMat)
+        ε_cijs = [ε0] + list(np.concatenate((c0u, c0d, c0l)))
         
-        if violations_count != 0:
-            if violations_count < violations_min:
-                violations_min = violations_count
-                minU, minD, minL, εmin = uCijs, dCijs, lCijs, ε
-            if i == iters:
-                print('No solution found after ' + str(i) + ''' iterations. 
-                      Best found has ''' + str(violations_min) + ' violations')
-                return minU, minD, minL, εmin, violations_min
-            i+=1
-            trigger = True
-            continue   
-        else:
-            print('Found Solution: ' + str(violations_count) + ' violations ')
-            return uCijs, dCijs, lCijs, ε, violations_count
-                
- 
+            
+            
+        uCijs, dCijs, lCijs, ε, χ2_row = find_min_of_row(ε_cijs, QUD, εmin, εmax)
+        
+
+        
+        if χ2_row < χ2_min:
+            χ2_min = χ2_row
+            minU, minD, minL, εmin = uCijs, dCijs, lCijs, ε
+            
+        if χ2_min < χ2_dream:
+            print('Found Dream Solution with χ2 =  ' + str(χ2_min))
+            return uCijs, dCijs, lCijs, ε, χ2_min
+            
+            
+        if i == iters:
+            print('No solution found after ' + str(i) + ''' iterations. 
+                  Best found has χ2 = ''' + str(χ2_min))
+            return minU, minD, minL, εmin, χ2_min
+        i+=1
 
 
    
     
           
-def minimize_all_rows(n33=1, only_ord_one=True, iters = 5):
+def minimize_all_rows(n33=1, iters = 5):
+    χ2_dream = 100
     QUDs = read(n33)
     εmin, εmax = get_bounds(n33)
     
     uDF = pd.DataFrame(columns = cijNames)
     dDF = pd.DataFrame(columns = cijNames)
     lDF = pd.DataFrame(columns = cijNames)
-    εDF = pd.DataFrame(columns = ['ε', 'O(1)_violations'])
+    εDF = pd.DataFrame(columns = ['ε', 'χ2', 'charge_index'])
     
     numFound = 0
     for i in range(len(QUDs)):
         print( 'On line: ' + str(i) )
         QUD = QUDs.iloc[i]
-        uCijs, dCijs, lCijs, ε, num_violations = run_til_small_for_row(QUD, εmin, εmax, iters=iters)
+        uCijs, dCijs, lCijs, ε, χ2 = run_til_small_for_row(QUD, εmin, εmax, iters=iters)
           
         
         uDF.loc[i] = mat_to_list(uCijs)
         dDF.loc[i] = mat_to_list(dCijs)
         lDF.loc[i] = mat_to_list(lCijs)
-        εDF.loc[i] = np.array([ε, int(num_violations)])
+        εDF.loc[i] = np.array([ε, int(χ2), i])
         
 
         
@@ -472,7 +473,7 @@ def minimize_all_rows(n33=1, only_ord_one=True, iters = 5):
         εDF.to_csv(path + folder + 'ε_&_status.dat',
                    index= False, sep= ' ')
         
-        if num_violations == 0:
+        if χ2 < χ2_dream:
             numFound +=1
         
         if numFound == 2:
@@ -482,31 +483,3 @@ def minimize_all_rows(n33=1, only_ord_one=True, iters = 5):
     
             
     return numFound
-       
-
-for i in range(1,11):
-    minimize_all_rows(i, iters=5)     
-        
-        
-    
-    
-
-# QUD = read(1).iloc[0]
-# print(QUD)
-# εmin, εmax = get_bounds(1)
-# u,d,l, ε = run_til_small_for_row(QUD, εmin, εmax, iters=1)
-
-
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
