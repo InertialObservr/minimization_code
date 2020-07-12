@@ -1,16 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jul 10 12:41:01 2020
-
-@author: dillonberger
-"""
-
-
-
 import numpy as np
 import pandas as pd
-from get_coeffs import χ2_of_row, get_masses_and_CKM, dag, get_ε_matrix
+from get_coeffs import χ2_of_row, get_masses_and_CKM, minimize_all_rows
 
 
 
@@ -98,11 +88,16 @@ def get_status(n33=1, species='up'):
     statusDF = pd.read_csv(directory+file, delim_whitespace=True)
     return statusDF
 
-upDF = get_coefs(1, 'up')
-downDF = get_coefs(1,'down')
-lepDF = get_coefs(1, 'lep')
-εDF = get_status(1, 'up')
-QUDs = get_QUDs(1)
+
+def get_all(n33=1):
+    upDF = get_coefs(n33, 'up')
+    downDF = get_coefs(n33,'down')
+    lepDF = get_coefs(n33, 'lep')
+    εDF = get_status(n33, 'up')
+    QUDs = get_QUDs(n33)
+        
+    
+    return upDF, downDF, lepDF, QUDs, εDF
 
 def structure_coefs_for_line(uCoefs_DF, dCoefs_DF, 
                              lCoefs_DF, ε_DF, line=1):
@@ -117,13 +112,14 @@ def structure_coefs_for_line(uCoefs_DF, dCoefs_DF,
 
 
 
-def prepare_data_for_χ2(line):
+
+def prepare_data_for_χ2(upDF, downDF, lepDF, QUDs, εDF, line=1):
     cijList = structure_coefs_for_line(upDF, downDF, lepDF, εDF, line=line)
     QUD = QUDs.iloc[line]
     
     return [cijList, QUD]
 
-def prepare_data_for_masses(line):
+def prepare_data_for_masses(upDF, downDF, lepDF, QUDs, εDF, line=1):
     cijs_and_ε = structure_coefs_for_line(upDF, downDF, lepDF, εDF, line=line)
     ε = cijs_and_ε[0]
     cijs = cijs_and_ε[1:]
@@ -132,43 +128,33 @@ def prepare_data_for_masses(line):
     return [QUD, ε, cijs]
 
 
-                
+def execute(n33, small_χ_only = True):
+    upDF, downDF, lepDF, QUDs, εDF = get_all(n33=n33)
+    
+    χs = []
+    χ2_dream =100
+    masses = []
+    for line in range(len(upDF)):
+        if small_χ_only:
+            if εDF.iloc[line]['χ2'] > χ2_dream:
+                continue 
+            
+        χ2_dat = prepare_data_for_χ2(upDF, downDF, lepDF, QUDs, εDF, line=line)
+        mass_dat = prepare_data_for_masses(upDF, downDF,lepDF, QUDs, εDF, line=line)
         
-    
-
-dataLine = prepare_data_for_χ2(8)
-
-z = χ2_of_row(*dataLine)
-
-dataMassesLine = prepare_data_for_masses(8)
-
-u,d,l,CKM = get_masses_and_CKM(*dataMassesLine)
-
-  
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        χs.append( χ2_of_row(*χ2_dat, transform=False) )
+        masses.append( get_masses_and_CKM(*mass_dat) )
+        
+    return χs, masses
+        
+        
+        
         
 
 
+for i in range(1,11):
+    print('n33 = ' + str(i))
+    minimize_all_rows(i, iters=5)                  
+        
+# χs, masses = execute(1, small_χ_only = True)
+    
