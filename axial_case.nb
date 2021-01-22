@@ -1,0 +1,823 @@
+Clear[A, \[Delta]A, \[CapitalPhi], d\[CapitalPhi], p\[CapitalPhi], \[CurlyPhi]]
+A[\[Mu]_] := Module[{},
+   {
+    {Subscript[\[Zeta], u] Subscript[a, \[Mu]] , 0, 0},
+    {0, Subscript[\[Zeta], d] Subscript[a, \[Mu]], 0},
+    {0, 0, Subscript[\[Zeta], s] Subscript[a, \[Mu]]}
+    }
+   ];
+
+\[Delta]A[\[Mu]_, \[Nu]_, i_ : 1] := Module[{},
+   
+   I (Subscript[
+\!\(\*SubsuperscriptBox[\(p\), \(1\), \(X\)]\), \[Mu]] Subscript[a, \[Nu]])*{
+     {Subscript[\[Zeta], u] , 0, 0},
+     {0, Subscript[\[Zeta], d] , 0},
+     {0, 0, Subscript[\[Zeta], s] }
+     }
+   ];
+
+
+\[CapitalPhi] = {
+   {Subscript[\[Pi], 0]/Sqrt[2] + \[Eta]/Sqrt[6], SuperPlus[\[Pi]], SuperPlus[
+    K]},
+   {SuperMinus[\[Pi]], -(Subscript[\[Pi], 0]/Sqrt[2]) + \[Eta]/Sqrt[
+     6], (Subscript[K, s] + Subscript[K, l])/Sqrt[2]},
+   {SuperMinus[
+    K], (Subscript[K, s] - Subscript[K, l])/Sqrt[2], -2 \[Eta]/Sqrt[6]}
+   };
+
+Clear[d\[CapitalPhi], p\[CapitalPhi]];
+d\[CapitalPhi][\[Mu]_] := {
+   {Subscript[\[Delta], \[Mu]] . Subscript[\[Pi], 0]/Sqrt[2] + 
+     Subscript[\[Delta], \[Mu]] . \[Eta]/Sqrt[6], 
+    Subscript[\[Delta], \[Mu]] . SuperPlus[\[Pi]], 
+    Subscript[\[Delta], \[Mu]] . SuperPlus[K]},
+   {Subscript[\[Delta], \[Mu]] . 
+     SuperMinus[\[Pi]], -(Subscript[\[Delta], \[Mu]] . Subscript[\[Pi], 0]/
+      Sqrt[2]) + Subscript[\[Delta], \[Mu]] . \[Eta]/Sqrt[
+     6], (Subscript[\[Delta], \[Mu]] . Subscript[K, s] + 
+       Subscript[\[Delta], \[Mu]] . Subscript[K, l])/Sqrt[2]},
+   {Subscript[\[Delta], \[Mu]] . SuperMinus[
+     K], (Subscript[\[Delta], \[Mu]] . Subscript[K, s] - 
+       Subscript[\[Delta], \[Mu]] . Subscript[K, l])/Sqrt[
+     2], -2 Subscript[\[Delta], \[Mu]] . \[Eta]/Sqrt[6]}
+   };
+
+(*Fourier transformed \[CapitalPhi], assuming outgoing P*)
+
+Clear[p\[CapitalPhi]];
+p\[CapitalPhi][\[Mu]_, i_ : 1] :=  Module[{P},
+  P = Subscript[p, i];
+  
+  -I {
+    {(Subscript[P^o, \[Mu]] Subscript[\[Pi], 0])/Sqrt[2] + (
+      Subscript[P^h, \[Mu]] \[Eta])/Sqrt[6], 
+     Subscript[SuperPlus[P], \[Mu]] SuperPlus[\[Pi]], 
+     Subscript[P^kp, \[Mu]] SuperPlus[K]},
+    {Subscript[SuperMinus[P], \[Mu]]
+       SuperMinus[\[Pi]], -((Subscript[P^o, \[Mu]] Subscript[\[Pi], 0])/Sqrt[
+       2]) + (Subscript[P^h, \[Mu]] \[Eta])/Sqrt[
+      6], (Subscript[P^s, \[Mu]] Subscript[K, s] + 
+        Subscript[P^l, \[Mu]] Subscript[K, l])/Sqrt[2]},
+    {Subscript[P^km, \[Mu]] SuperMinus[
+      K], (Subscript[P^s, \[Mu]] Subscript[K, s] - 
+        Subscript[P^l, \[Mu]] Subscript[K, l])/Sqrt[2], -2 (
+      Subscript[P^h, \[Mu]] \[Eta])/Sqrt[6]}
+    }
+  
+  ]
+
+\[CurlyPhi][\[Mu]_, \[Nu]_] := Sqrt[2] {
+   {(Subscript[\[Rho], \[Mu], \[Nu]] + Subscript[\[Omega], \[Mu], \[Nu]])/
+    Sqrt[2], Subscript[(SuperPlus[\[Rho]]), \[Mu], \[Nu]] , 
+    Subscript[(SuperPlus[\[CapitalKappa]]), \[Mu], \[Nu]]},
+   {Subscript[(SuperMinus[\[Rho]]), \[Mu], \[Nu]], (-Subscript[\[Rho], \[Mu], \
+\[Nu]] + Subscript[\[Omega], \[Mu], \[Nu]])/Sqrt[2] , 
+    Subscript[(\[CapitalKappa]^o), \[Mu], \[Nu]]},
+   {Subscript[(SuperMinus[\[CapitalKappa]]), \[Mu], \[Nu]], Subscript[(
+\!\(\*OverscriptBox[
+SuperscriptBox[\(\[CapitalKappa]\), \(\[Omicron]\)], \(_\)]\)), \[Mu], \
+\[Nu]], Subscript[\[Phi], \[Mu], \[Nu]] }
+   }
+
+(*\[Beta] = Sqrt[2]/f*)
+
+Clear[L0];
+
+L0[ ord_ : 1] := Module[{DU, DUdag},
+  DU[\[Mu]_] := \[Delta]e\[CapitalPhi][\[Mu], 1, (\[Beta]), ord] - 
+    I A[\[Mu]] . e\[CapitalPhi][\[CapitalPhi], \[Beta], ord] - 
+    I e\[CapitalPhi][\[CapitalPhi], \[Beta], ord] . A[\[Mu]];
+  
+  DUdag[\[Mu]_] := \[Delta]e\[CapitalPhi][\[Mu], 1, (- \[Beta] ), ord] + 
+    I e\[CapitalPhi][\[CapitalPhi], -\[Beta], ord] . A[\[Mu]] + 
+    I A[\[Mu]] . e\[CapitalPhi][\[CapitalPhi], -\[Beta], ord];
+  
+  1/(2 \[Beta]^2) * Tr[DU[\[Mu]] . DUdag[\[Mu]]]
+  
+  ]
+
+Clear[e\[CapitalPhi]];
+
+e\[CapitalPhi][arg_, \[Alpha]_, ord_ : 3] := Module[{},
+  
+  IdentityMatrix[3] + \!\(
+\*UnderoverscriptBox[\(\[Sum]\), \(k = 1\), \(ord\)]\(
+\*FractionBox[
+SuperscriptBox[\((I\ *\[Alpha])\), \(k\)], \(k!\)]*MatrixPower[arg, \ k]\)\)
+  
+  ]
+
+Clear[\[Delta]e\[CapitalPhi]];
+
+\[Delta]e\[CapitalPhi][ \[Mu]_, i_, \[Alpha]_, order_ : 3] := Module[{},
+  
+   \!\(
+\*UnderoverscriptBox[\(\[Sum]\), \(m = 1\), \(order\)]\(
+\*FractionBox[
+SuperscriptBox[\((I\ \[Alpha])\), \(m\)], \(m!\)]\ \(
+\*UnderoverscriptBox[\(\[Sum]\), \(k = 
+       1\), \(m\)]MatrixPower[\[CapitalPhi], \ m - k] . 
+      p\[CapitalPhi][\[Mu], i] . MatrixPower[\[CapitalPhi], k - 1]\)\)\)
+  
+  ]
+
+Clear[U, F];
+
+
+F[\[Mu]_, \[Nu]_] := \[Delta]A[\[Mu], \[Nu]] - \[Delta]A[\[Nu], \[Mu]]
+
+comm[a_, b_] := a . b - b . a
+acom[a_, b_] := a . b + b . a
+
+L1 = I Subscript[f, V]/
+   2* \[Alpha] ( 
+    Tr[\[CurlyPhi][\[Mu], \[Nu]] . 
+       comm[F[\[Mu], \[Nu]], \[CapitalPhi]] ]    -
+     \[Alpha]^2 (1/
+         2 Tr[ \[CapitalPhi] . 
+           comm[\[CurlyPhi][\[Mu], \[Nu]], \[CapitalPhi]] . \[CapitalPhi] . 
+           F[\[Mu], \[Nu]] ] 
+        + 1/
+         6 Tr[  comm[\[CapitalPhi] . \[CapitalPhi] . \[CapitalPhi], \
+\[CurlyPhi][\[Mu], \[Nu]]] . F[\[Mu], \[Nu]] ]) 
+    ) ;
+
+Clear[t, f];
+Clear[L3];
+L3[] := Module[{T1, T2, T3, f0, f2, U\[Nu]\[Mu]},
+  
+  T1[\[Mu]_, i_] := Subscript[t, 1] 2 I \[Alpha] p\[CapitalPhi][\[Mu], i];
+  T3[\[Mu]_, i_] := 
+   Subscript[t, 3]  ((I \[Alpha])^3)/
+    3 (p\[CapitalPhi][\[Mu], 
+        i] . \[CapitalPhi] . \[CapitalPhi] + \[CapitalPhi] . \[CapitalPhi] . 
+       p\[CapitalPhi][\[Mu], i] - 
+      2 \[CapitalPhi] . p\[CapitalPhi][\[Mu], i] . \[CapitalPhi]);
+  f0[\[Mu]_] := Subscript[f, 0] 2 A[\[Mu]];
+  f2[\[Mu]_] := 
+   Subscript[f, 
+    2] (I \[Alpha])^2*(A[\[Mu]] . \[CapitalPhi] . \[CapitalPhi] + \
+\[CapitalPhi] . \[CapitalPhi] . A[\[Mu]] - 
+      2 \[CapitalPhi] . A[\[Mu]] . \[CapitalPhi]);
+  
+  U\[Nu]\[Mu] =  
+   1/4*(T1[\[Nu], 1] . T1[\[Mu], 2] - 
+      I (T1[\[Nu], 1] . f0[\[Mu]] + T1[\[Nu], 1] . f2[\[Mu]] + 
+         T3[\[Nu], 1] . f0[\[Mu]]) - 
+      I (f0[\[Nu]] . T1[\[Mu], 2] + f0[\[Nu]] . T3[\[Mu], 2]  + 
+         f2[\[Nu]] . T1[\[Mu], 2]));
+  
+  I/2 Subscript[f, V] Subscript[h, P]
+    Tr[U\[Nu]\[Mu] . \[CurlyPhi][\[Mu], \[Nu]]]
+  
+  ]
+
+Clear[L4];
+
+L4[ord_] := Module[{DU, DUdag, term1, term2, term3, term4, V},
+  
+  DU[\[Mu]_, i_ : 1] := \[Delta]e\[CapitalPhi][\[Mu], i, (\[Beta]), ord] - 
+    I A[\[Mu]] . e\[CapitalPhi][\[CapitalPhi], \[Beta], ord] - 
+    I e\[CapitalPhi][\[CapitalPhi], \[Beta], ord] . A[\[Mu]];
+  
+  DUdag[\[Mu]_, 
+    i_ : 1] := \[Delta]e\[CapitalPhi][\[Mu], i, (- \[Beta] ), ord] + 
+    I e\[CapitalPhi][\[CapitalPhi], -\[Beta], ord] . A[\[Mu]] + 
+    I A[\[Mu]] . e\[CapitalPhi][\[CapitalPhi], -\[Beta], ord];
+  
+  V[\[Mu]_, \[Nu]_, 
+    i_ : 1] := \[Delta]A[\[Mu], \[Nu], i] - \[Delta]A[\[Nu], \[Mu], i];
+  
+  term1 = Subscript[L, 1]
+     Tr[DUdag[\[Mu], 1] . DU[\[Mu], 2]] Tr[DUdag[\[Nu], 3] . DU[\[Nu], 4]];
+  term2 = Subscript[L, 2]
+     Tr[DUdag[\[Mu], 1] . DU[\[Nu], 2]] Tr[DUdag[\[Mu], 3] . DU[\[Nu], 4]];
+  term3 = Subscript[L, 3]
+     Tr[DUdag[\[Mu], 1] . DU[\[Mu], 2] . DUdag[\[Nu], 3] . DU[\[Nu], 4]];
+  term4 = -I Subscript[L, 9]
+     Tr[V[\[Mu], \[Nu]] . DUdag[\[Mu], 1] . DU[\[Nu], 2] - 
+      V[\[Mu], \[Nu]] . DU[\[Mu], 3] . DUdag[\[Nu], 4]];
+  
+  Return[term1 + term2 + term3 + term4]
+  
+  ]
+
+
+Clear[fieldsEqualQ];
+
+fieldsEqualQ[fieldList_] := 
+ Module[{allCombs, fields, fac, numOfFields , boolList, checked, numOccurs},
+  
+  numOccurs = {};
+  checked = {};
+  fields = Union[fieldList];
+  
+  For[ix = 1, ix <= Length[fieldList], ix++,
+   
+   If[MemberQ[checked, fieldList[[ix]] ], Continue[]];
+   
+   numOfFields = Count[fieldList, fieldList[[ix]]];
+   fac = numOfFields!;
+   numOccurs = Append[numOccurs, fac];
+   checked = Append[checked,  fieldList[[ix]] ];
+   
+   ];
+  
+  
+  Return[Times @@ numOccurs]
+  
+  ]
+
+
+takeLinearDM[expr_] := Module[{final1, final2},
+  
+  final1 = 
+   Subscript[
+    a, \[Mu]] (D[expr, Subscript[a, \[Mu]]] /. {Subscript[a, \[Mu]] -> 0, 
+       Subscript[a, \[Nu]] -> 0});
+  final2 = 
+   Subscript[
+    a, \[Nu]] (D[expr, Subscript[a, \[Nu]]] /. {Subscript[a, \[Mu]] -> 0, 
+       Subscript[a, \[Nu]] -> 0});
+  
+  Return[final1 + final2];
+  
+  
+  ]
+
+1 body final states
+
+Clear[getRules1\[CapitalPhi]];
+
+
+getRules1\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+   
+   f1 = fields[[i]];
+   
+   
+   m1 = masses[[i]];
+   
+   mtot = m1;
+   
+   fac = 1;
+   
+   vertex = f1;
+   hcVertex = (vertex /. hcAll);
+   
+   If[ MemberQ[vertices, vertex], Continue[] ];
+   If[ MemberQ[vertices, hcVertex], Continue[] ];
+   
+   rule = takeLinearDM[1/fac D[lagr, {f1, 1}] /. fieldsToZero];
+   
+   simplifiedRule = Simplify[rule];
+   
+   If[ simplifiedRule == 0, Continue[]];
+   
+   vertices = Append[vertices, vertex];
+   vertices = Append[vertices, hcVertex];
+   
+   massArray = Append[massArray, {vertex, mtot} ];
+   
+   table = 
+    Append[table, {vertex, 
+      Collect[
+       simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+        Subscript[t, 1] Subscript[f, 2], 
+        Subscript[t, 3] Subscript[f, 0]}] }  ];
+   
+   
+   
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+2 body final states
+
+Clear[getRules2\[CapitalPhi]];
+
+
+getRules2\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+    
+    
+    f1 = fields[[i]];
+    f2 = fields[[j]];
+    
+    
+    m1 = masses[[i]];
+    m2 = masses[[j]];
+    
+    mtot = m1 + m2;
+    If[mtot > 1000, Continue[] ];
+    
+    fac = fieldsEqualQ[{f1, f2}];
+    
+    vertex = f1*f2;
+    hcVertex = (vertex /. hcAll);
+    
+    If[ MemberQ[vertices, vertex], Continue[] ];
+    If[ MemberQ[vertices, hcVertex], Continue[] ];
+    
+    rule = takeLinearDM[1/fac D[lagr, {f1, 1}, {f2, 1}] /. fieldsToZero];
+    
+    simplifiedRule = Simplify[rule];
+    
+    If[ simplifiedRule == 0, Continue[]];
+    
+    vertices = Append[vertices, vertex];
+    vertices = Append[vertices, hcVertex];
+    
+    massArray = Append[massArray, {vertex, mtot} ];
+    
+    table = 
+     Append[table, {vertex, 
+       Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+         Subscript[t, 1] Subscript[f, 2], 
+         Subscript[t, 3] Subscript[f, 0]}] }  ];
+    
+    
+    
+    
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+3 body final states
+
+Clear[getRules3\[CapitalPhi]];
+
+
+getRules3\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+     For[ k = 1, k <= Length[fields], k++,
+     
+     
+     f1 = fields[[i]];
+     f2 = fields[[j]];
+     f3 = fields[[k]];
+     
+     
+     m1 = masses[[i]];
+     m2 = masses[[j]];
+     m3 = masses[[k]];
+     
+     mtot = m1 + m2 + m3;
+     
+     If[mtot > 1000, Continue[] ];
+     
+     fac = fieldsEqualQ[{f1, f2, f3}];
+     
+     vertex = f1*f2*f3;
+     hcVertex = (vertex /. hcAll);
+     
+     If[ MemberQ[vertices, vertex], Continue[] ];
+     If[ MemberQ[vertices, hcVertex], Continue[] ];
+     
+     rule = 
+      takeLinearDM[1/fac D[lagr, {f1, 1}, {f2, 1}, {f3, 1}] /. fieldsToZero];
+     
+     simplifiedRule = Simplify[rule];
+     
+     If[ simplifiedRule == 0, Continue[]];
+     
+     vertices = Append[vertices, vertex];
+     vertices = Append[vertices, hcVertex];
+     
+     massArray = Append[massArray, {vertex, mtot} ];
+     
+     table = 
+      Append[table, {vertex, 
+        Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+          Subscript[t, 1] Subscript[f, 2], 
+          Subscript[t, 3] Subscript[f, 0]}] }  ];
+     
+     
+     
+     ]
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+4body final states 
+
+Clear[getRules];
+
+
+getRules[lagr_, retMasses_ : False] := Module[{f1, f2, f3, f4, fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+     For[ k = 1, k <= Length[fields], k++,
+      For[ \[Tau] = 1, \[Tau] <= Length[fields], \[Tau]++,
+      
+      f1 = fields[[i]];
+      f2 = fields[[j]];
+      f3 = fields[[k]];
+      f4 = fields[[\[Tau]]];
+      
+      m1 = masses[[i]];
+      m2 = masses[[j]];
+      m3 = masses[[k]];
+      m4 = masses[[\[Tau]]];
+      mtot = m1 + m2 + m3 + m4;
+      
+      If[mtot > 1000, Continue[] ];
+      
+      fac = fieldsEqualQ[{f1, f2, f3, f4}];
+      
+      vertex = f1*f2*f3*f4;
+      hcVertex = (vertex /. hcAll);
+      
+      If[ MemberQ[vertices, vertex], Continue[] ];
+      If[ MemberQ[vertices, hcVertex], Continue[] ];
+      
+      rule = 
+       takeLinearDM[ 
+        1/fac D[lagr, {f1, 1}, {f2, 1}, {f3, 1}, {f4, 1}] /. fieldsToZero];
+      
+      simplifiedRule = Simplify[rule];
+      
+      If[ simplifiedRule == 0, Continue[]];
+      
+      vertices = Append[vertices, vertex];
+      vertices = Append[vertices, hcVertex];
+      
+      massArray = Append[massArray, {vertex, mtot} ];
+      
+      table = 
+       Append[table, {vertex, 
+         Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+           Subscript[t, 1] Subscript[f, 2], 
+           Subscript[t, 3] Subscript[f, 0]}] }  ];
+      
+      
+      ]
+     ]
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+5body final states 
+
+Clear[getRules5\[CapitalPhi]];
+
+
+getRules5\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+     For[ k = 1, k <= Length[fields], k++,
+      For[ \[Tau] = 1, \[Tau] <= Length[fields], \[Tau]++,
+      For[\[Delta] = 1, \[Delta] <= Length[fields], \[Delta]++,
+       
+       f1 = fields[[i]];
+       f2 = fields[[j]];
+       f3 = fields[[k]];
+       f4 = fields[[\[Tau]]];
+       f5 = fields[[\[Delta]]];
+       
+       m1 = masses[[i]];
+       m2 = masses[[j]];
+       m3 = masses[[k]];
+       m4 = masses[[\[Tau]]];
+       m5 = masses[[\[Delta]]];
+       mtot = m1 + m2 + m3 + m4 + m5;
+       If[mtot > 1000, Continue[] ];
+       
+       fac = fieldsEqualQ[{f1, f2, f3, f4, f5}];
+       
+       vertex = f1*f2*f3*f4*f5;
+       hcVertex = (vertex /. hcAll);
+       
+       If[ MemberQ[vertices, vertex], Continue[] ];
+       If[ MemberQ[vertices, hcVertex], Continue[] ];
+       
+       rule = 
+        takeLinearDM[
+         1/fac D[lagr, {f1, 1}, {f2, 1}, {f3, 1}, {f4, 1}, {f5, 1}] /. 
+          fieldsToZero];
+       
+       simplifiedRule = Simplify[rule];
+       
+       If[ simplifiedRule == 0, Continue[]];
+       
+       vertices = Append[vertices, vertex];
+       vertices = Append[vertices, hcVertex];
+       
+       massArray = Append[massArray, {vertex, mtot} ];
+       
+       table = 
+        Append[table, {vertex, 
+          Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+            Subscript[t, 1] Subscript[f, 2], 
+            Subscript[t, 3] Subscript[f, 0]}] }  ];
+       
+       
+       ]
+      ]
+     ]
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+6body final states 
+
+Clear[getRules6\[CapitalPhi]];
+
+
+getRules6\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5, f6,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, m6, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+     For[ k = 1, k <= Length[fields], k++,
+      For[ \[Tau] = 1, \[Tau] <= Length[fields], \[Tau]++,
+      For[\[Delta] = 1, \[Delta] <= Length[fields], \[Delta]++,
+       For[\[CurlyEpsilon] = 1, \[CurlyEpsilon] <= 
+         Length[fields], \[CurlyEpsilon]++,
+        
+        f1 = fields[[i]];
+        f2 = fields[[j]];
+        f3 = fields[[k]];
+        f4 = fields[[\[Tau]]];
+        f5 = fields[[\[Delta]]];
+        f6 = fields[[\[CurlyEpsilon]]];
+        
+        m1 = masses[[i]];
+        m2 = masses[[j]];
+        m3 = masses[[k]];
+        m4 = masses[[\[Tau]]];
+        m5 = masses[[\[Delta]]];
+        m6 = masses[[\[CurlyEpsilon]]];
+        
+        mtot = m1 + m2 + m3 + m4 + m5 + m6;
+        If[mtot > 1000, Continue[] ];
+        
+        fac = fieldsEqualQ[{f1, f2, f3, f4, f5, f6}];
+        
+        vertex = f1*f2*f3*f4*f5*f6;
+        hcVertex = (vertex /. hcAll);
+        
+        If[ MemberQ[vertices, vertex], Continue[] ];
+        If[ MemberQ[vertices, hcVertex], Continue[] ];
+        
+        rule = 
+         takeLinearDM[
+          1/fac D[lagr, {f1, 1}, {f2, 1}, {f3, 1}, {f4, 1}, {f5, 1}, {f6, 
+              1}] /. fieldsToZero];
+        
+        simplifiedRule = Simplify[rule];
+        
+        If[ simplifiedRule == 0, Continue[]];
+        
+        vertices = Append[vertices, vertex];
+        vertices = Append[vertices, hcVertex];
+        
+        massArray = Append[massArray, {vertex, mtot} ];
+        
+        table = 
+         Append[table, {vertex, 
+           
+           Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+             Subscript[t, 1] Subscript[f, 2], 
+             Subscript[t, 3] Subscript[f, 0]}] }  ];
+        
+        
+        ]
+       ]
+      ]
+     ]
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+7body final states 
+
+Clear[getRules7\[CapitalPhi]];
+
+
+getRules7\[CapitalPhi][lagr_, retMasses_ : False] := 
+ Module[{f1, f2, f3, f4, f5, f6, f7,
+    fac,
+    vertices, vertex, hcVertex,
+   rule, table, simplifiedRule,
+   m1, m2, , m3, m4, m5, m6, m7, mtot, massArray},
+  
+  vertices = {};
+  table = {};
+  massArray = {};
+  
+   For[ i = 1, i <= Length[fields], i++,
+    For[ j = 1, j <= Length[fields], j++,
+     For[ k = 1, k <= Length[fields], k++,
+      For[ \[Tau] = 1, \[Tau] <= Length[fields], \[Tau]++,
+      For[\[Delta] = 1, \[Delta] <= Length[fields], \[Delta]++,
+       For[\[CurlyEpsilon] = 1, \[CurlyEpsilon] <= 
+         Length[fields], \[CurlyEpsilon]++,
+        For[\[Theta] = 1, \[Theta] <= Length[fields], \[Theta]++,
+         
+         f1 = fields[[i]];
+         f2 = fields[[j]];
+         f3 = fields[[k]];
+         f4 = fields[[\[Tau]]];
+         f5 = fields[[\[Delta]]];
+         f6 = fields[[\[CurlyEpsilon]]];
+         f7 = fields[[\[Theta]]];
+         
+         
+         m1 = masses[[i]];
+         m2 = masses[[j]];
+         m3 = masses[[k]];
+         m4 = masses[[\[Tau]]];
+         m5 = masses[[\[Delta]]];
+         m6 = masses[[\[CurlyEpsilon]]];
+         m7 = masses[[\[Theta]]];
+         
+         mtot = m1 + m2 + m3 + m4 + m5 + m6 + m7;
+         If[mtot > 1000, Continue[] ];
+         
+         fac = fieldsEqualQ[{f1, f2, f3, f4, f5, f6, f7}];
+         
+         vertex = f1*f2*f3*f4*f5*f6*f7;
+         hcVertex = (vertex /. hcAll);
+         
+         If[ MemberQ[vertices, vertex], Continue[] ];
+         If[ MemberQ[vertices, hcVertex], Continue[] ];
+         
+         rule = 
+          takeLinearDM[ 
+           1/fac D[lagr, {f1, 1}, {f2, 1}, {f3, 1}, {f4, 1}, {f5, 1}, {f6, 
+               1}, {f7, 1}] /. fieldsToZero];
+         
+         simplifiedRule = Simplify[rule];
+         
+         If[ simplifiedRule == 0, Continue[]];
+         
+         vertices = Append[vertices, vertex];
+         vertices = Append[vertices, hcVertex];
+         
+         massArray = Append[massArray, {vertex, mtot} ];
+         
+         table = 
+          Append[table, {vertex, 
+            Collect[simplifiedRule, {Subscript[t, 1] Subscript[f, 0], 
+              Subscript[t, 1] Subscript[f, 2], 
+              Subscript[t, 3] Subscript[f, 0]}] }  ];
+         
+         ]
+        ]
+       ]
+      ]
+     ]
+    ]
+   ];
+  
+  If[retMasses, Return[massArray], Return[table] ]
+  
+  ]
+
+hc = {SuperPlus[\[Pi]] -> SuperMinus[\[Pi]], 
+   SuperMinus[\[Pi]] -> SuperPlus[\[Pi]], SuperMinus[K] -> SuperPlus[K], 
+   SuperPlus[K] -> SuperMinus[K]};
+hcv = {Subscript[(SuperPlus[\[Rho]]), \[Mu], \[Nu]] -> 
+    Subscript[(SuperMinus[\[Rho]]), \[Mu], \[Nu]], 
+   Subscript[(SuperMinus[\[Rho]]), \[Mu], \[Nu]] -> 
+    Subscript[(SuperPlus[\[Rho]]), \[Mu], \[Nu]], 
+   Subscript[(SuperPlus[\[CapitalKappa]]), \[Mu], \[Nu]] -> 
+    Subscript[(SuperMinus[\[CapitalKappa]]), \[Mu], \[Nu]], 
+   Subscript[(SuperMinus[\[CapitalKappa]]), \[Mu], \[Nu]] -> 
+    Subscript[(SuperPlus[\[CapitalKappa]]), \[Mu], \[Nu]] , 
+   Subscript[(\[CapitalKappa]^o), \[Mu], \[Nu]] -> Subscript[(
+\!\(\*OverscriptBox[
+SuperscriptBox[\(\[CapitalKappa]\), \(\[Omicron]\)], \(_\)]\)), \[Mu], \
+\[Nu]], Subscript[(
+\!\(\*OverscriptBox[
+SuperscriptBox[\(\[CapitalKappa]\), \(\[Omicron]\)], \(_\)]\)), \[Mu], \[Nu]] \
+-> Subscript[(\[CapitalKappa]^o), \[Mu], \[Nu]]};
+
+
+fields  = {Subscript[\[Pi], 0], \[Eta], SuperPlus[\[Pi]], SuperMinus[\[Pi]], 
+   SuperMinus[K], SuperPlus[K], Subscript[K, l], Subscript[K, s],
+    Subscript[(SuperPlus[\[Rho]]), \[Mu], \[Nu]], 
+   Subscript[(SuperMinus[\[Rho]]), \[Mu], \[Nu]], 
+   Subscript[(SuperPlus[\[CapitalKappa]]), \[Mu], \[Nu]], 
+   Subscript[(SuperMinus[\[CapitalKappa]]), \[Mu], \[Nu]], 
+   Subscript[(\[CapitalKappa]^o), \[Mu], \[Nu]], Subscript[(
+\!\(\*OverscriptBox[
+SuperscriptBox[\(\[CapitalKappa]\), \(\[Omicron]\)], \(_\)]\)), \[Mu], \[Nu]] \
+, Subscript[\[Rho], \[Mu], \[Nu]], Subscript[\[Omega], \[Mu], \[Nu]], 
+   Subscript[\[Phi], \[Mu], \[Nu]]};
+
+fieldsToZero = (# -> 0) & /@ fields;
+
+masses = {134, 547, 139, 139, 493, 493, 497, 497, 755, 755, 891, 891, 895, 
+   895, 775, 782, 1019};
+
+(*need to take I \[Rule] -I also*)
+
+hcAll =  Join[hc, hcv, {I -> -I}];
+
+c1 = (I Subscript[f, V] \[Alpha]^3/
+    24  (Subscript[\[Delta], \[Mu]] . Subscript[a, \[Nu]] - 
+      Subscript[\[Delta], \[Nu]] . Subscript[a, \[Mu]])  );
+c4 = Subscript[a, \[Nu] ] \[Alpha]^3 2 Sqrt[2] I;
+c3 = (\[Alpha]^3 Subscript[f, V] Subscript[h, P])/(24 Sqrt[2]);
+
+rule = {Subscript[a, \[Mu]] -> Subscript[(\[Gamma]^5 . \[Gamma]^\[Mu]), ab], 
+   Subscript[a, \[Nu]] -> Subscript[(\[Gamma]^5 . \[Gamma]^\[Nu]), ab] };
+sqToZero = {Subscript[\[Zeta], u]^2 -> 0, Subscript[\[Zeta], d]^2 -> 0, 
+   Subscript[\[Zeta], s]^2 -> 0};
+
+d1 = D[L4[7], {Subscript[\[Pi], 0], 3}]/(3! 2! 2!);
+
+d2 = D[d1, {SuperPlus[\[Pi]], 2}];
+
+d3 = D[d2, {SuperMinus[\[Pi]], 2}];
+
+d4 = Simplify[d3];
+
+(*cc1 = getRules1\[CapitalPhi][L4[3]];
+cc1//MatrixForm*)
+
+(*cc5 =  getRules5\[CapitalPhi][L4[5]] ;
+*)
+
+(*cc5//MatrixForm*)
+
+(*cc7 = getRules7\[CapitalPhi][L4[6]];*)
